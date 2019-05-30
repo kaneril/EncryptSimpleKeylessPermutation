@@ -21,7 +21,7 @@ namespace EncryptSimpleKeylessPermutation
                         EncryptText();
                         break;
                     case "2":
-                        //DecryptText();
+                        DecryptText();
                         break;
                     case "3":
                         System.Environment.Exit(0);
@@ -60,17 +60,68 @@ namespace EncryptSimpleKeylessPermutation
             {
                 Console.WriteLine(e.Message);
             }            
-        }
-        
+        }        
         static string MakeEncryptText(uint ColumnsNumber, string NormalText)
         {
             string NewText = "";
             for (var i=0; i<ColumnsNumber;i++)
             {
-                for (var j=0; j<NormalText.Length; j+=(int)ColumnsNumber)
+                for (var j=0; i+j<NormalText.Length; j+=(int)ColumnsNumber)
                 {
                     NewText += NormalText[j + i];
                 }
+            }
+            return NewText;
+        }
+        static void DecryptText()
+        {
+            try
+            {
+                Console.WriteLine("Введите путь к файлу с закодированным текстом");
+                var path = Console.ReadLine();
+                uint ColumnsNumber = 0;
+                string EncryptText = "";
+                using (StreamReader sr = new StreamReader(path, System.Text.Encoding.Default))
+                {
+                    ColumnsNumber = UInt32.Parse(sr.ReadLine());
+                    var i = 1 / ColumnsNumber;
+                    EncryptText = sr.ReadToEnd();
+                }
+                var NewText = MakeDecryptText(ColumnsNumber, EncryptText);
+                Console.WriteLine("Введите путь к файлу с раскодированным текстом");
+                path = Console.ReadLine();
+                using (StreamWriter sw = new StreamWriter(path, false, System.Text.Encoding.Default))
+                {
+                    sw.WriteLine(NewText);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        static string MakeDecryptText(uint ColumnsNumber, string EncryptText)
+        {
+            string NewText = "";
+            for (var i = 0; i < EncryptText.Length / ColumnsNumber; i++)
+            {
+                for (var j = 0; j < ColumnsNumber; j++)
+                {
+                    int k = 0;
+                    if (j>= EncryptText.Length % ColumnsNumber)
+                    {
+                        k = j * (EncryptText.Length / (int)ColumnsNumber) + (EncryptText.Length % (int)ColumnsNumber)+i;
+                    }
+                    else
+                    {
+                        k = j * (EncryptText.Length / (int)ColumnsNumber)+j+i;
+                    }
+                    NewText += EncryptText[k];
+                }
+            }
+            for (var i = 0; i < EncryptText.Length % (int)ColumnsNumber; i++)
+            {
+                NewText += EncryptText[(i + 1) * (EncryptText.Length / (int)ColumnsNumber + 1) - 1];
             }
             return NewText;
         }
